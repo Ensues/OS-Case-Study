@@ -22,8 +22,6 @@ This repository delivers a Tkinter-based page replacement algorithm simulator de
 
 1. **Python** 3.9+
 2. **Tkinter** (bundled with standard Python installation)
-3. **Random**
-4. **Webbrowser**
 
 ---
 
