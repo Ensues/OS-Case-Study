@@ -1,5 +1,6 @@
 import tkinter as tk
 import random
+import webbrowser
 
 # Constants for drawing and animation settings.
 FRAME_WIDTH = 60
@@ -11,6 +12,19 @@ ANIMATION_DELAY = 50   # Time delay (ms) between animation moves.
 ANIMATION_STEPS = 20   # Number of steps in the move animation.
 MAX_FRAMES_ALLOWED = 9
 MAX_REF_LENGTH = 30
+
+HIDDEN_BUTTON_STYLE = {
+    'foreground': 'black',
+    'background': 'white',
+    'activebackground': 'black',
+    'activeforeground': 'white',
+    'highlightthickness': 1,
+    'highlightbackground': 'black',
+    'highlightcolor': 'black',
+    'borderwidth': 0,
+    'cursor': 'hand1',
+    'font': ('Arial', 32, 'bold')
+}
 
 BUTTON_STYLE = {
     'foreground': 'white',
@@ -25,6 +39,34 @@ BUTTON_STYLE = {
     'font': ('Arial', 16, 'bold')
 }
 
+LABEL_STYLE = {
+    'foreground': 'black',
+    'background': 'white',
+    'font': ('Arial', 16, 'bold')
+}
+
+def open_link(url):
+    webbrowser.open_new(url)
+
+def create_link_label(parent, text, url):
+    link_label = tk.Label(
+        parent, 
+        text=text, 
+        foreground="white",
+        background="black",
+        activebackground="white",
+        activeforeground="black",
+        highlightthickness= 3,
+        highlightbackground="black",
+        highlightcolor="black",
+        borderwidth=3,
+        font=("Arial", 16, "bold"), 
+        cursor="hand2",
+        pady=20,
+    )
+    link_label.bind("<Button-1>", lambda e: open_link(url))
+    return link_label
+
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -34,7 +76,7 @@ class App(tk.Tk):
 
         # Create and store frames
         self.frames = {}
-        for F in (LoadingFrame, MainMenuFrame, SimulatorFrame, EasterEggFrame):
+        for F in (LoadingFrame, MainMenuFrame, SimulatorFrame, CreditsFrame):
             frame = F(parent=self, controller=self)
             self.frames[F] = frame
             frame.place(relwidth=1, relheight=1)
@@ -73,7 +115,7 @@ class LoadingFrame(tk.Frame):
 
         self.progress = 0
         self.max_width = 700
-        self.step = self.max_width // 100
+        self.step = self.max_width // 125
         self.animate()
 
     def animate(self):
@@ -90,22 +132,22 @@ class MainMenuFrame(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent, bg="white")
         self.controller = controller
+        
+        # Credits Button
+        back_btn = tk.Button(
+            self,
+            text="!!!",
+            command=lambda: controller.show_frame(CreditsFrame),
+            **BUTTON_STYLE
+        )
+        back_btn.place(x=10, y=10)
 
         # Title Easter Egg
         title = tk.Button(
             self,
-            command=lambda: controller.show_frame(EasterEggFrame),
+            command=lambda: controller.show_frame(CreditsFrame),
             text="Simulator",
-            font=("Arial", 32, "bold"),
-            foreground="black",
-            background="white",
-            activebackground="black",
-            activeforeground="white",
-            highlightthickness= 1,
-            highlightbackground="black",
-            highlightcolo="black",
-            borderwidth=0,
-            cursor="hand1",
+            **HIDDEN_BUTTON_STYLE
         )
         title.pack(pady=200)
 
@@ -131,7 +173,7 @@ class MainMenuFrame(tk.Frame):
         )
         exit_btn.grid(row=0, column=1, padx=20)
 
-class EasterEggFrame(tk.Frame):
+class CreditsFrame(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent, bg="white")
         self.controller = controller
@@ -145,69 +187,72 @@ class EasterEggFrame(tk.Frame):
         )
         back_btn.place(x=10, y=10)
 
+        MainTitle = tk.Frame(self, bg="white")
+        MainTitle.pack(pady=50)
+        
         title = tk.Label(
-            self,
+            MainTitle,
             text="CREDITS",
             font=("Arial", 32, "bold"),
             fg="black",
             bg="white"
-        )
-        title.pack(pady=50)
+        ).grid(row=0, column=0)
+        subtitle = tk.Label(
+            MainTitle,
+            text="BSCS 3B OS Case Study",
+            **LABEL_STYLE
+        ).grid(row=1, column=0)
         
         ctrl = tk.Frame(self, bg="white")
         ctrl.pack(pady=40)
         
         tk.Label(
             ctrl, text="Tech Lead:",
-            fg="black", bg="white",
-            font=("Arial", 16, "bold")
+            **LABEL_STYLE
         ).grid(row=0, column=0, padx=5)
         tk.Label(
             ctrl, text="Quiambao, Eric Janssen P.",
-            fg="black", bg="white",
-            font=("Arial", 16, "bold")
+            **LABEL_STYLE
         ).grid(row=0, column=1, padx=5)
         tk.Label(
             ctrl, text="Programmer:",
-            fg="black", bg="white",
-            font=("Arial", 16, "bold")
+            **LABEL_STYLE
         ).grid(row=1, column=0, padx=5)
         tk.Label(
             ctrl, text="Quiambao, Eric Janssen P.",
-            fg="black", bg="white",
-            font=("Arial", 16, "bold")
+            **LABEL_STYLE
         ).grid(row=1, column=1, padx=5)
         tk.Label(
             ctrl, text="Designer:",
-            fg="black", bg="white",
-            font=("Arial", 16, "bold")
+            **LABEL_STYLE
         ).grid(row=2, column=0, padx=5)
         tk.Label(
             ctrl, text="Quiambao, Eric Janssen P.",
-            fg="black", bg="white",
-            font=("Arial", 16, "bold")
+            **LABEL_STYLE
         ).grid(row=2, column=1, padx=5)
         tk.Label(
             ctrl, text="Special Mention:",
-            fg="black", bg="white",
-            font=("Arial", 16, "bold")
+            **LABEL_STYLE
         ).grid(row=3, column=0, padx=5)
         tk.Label(
             ctrl, text="Quiambao, Eric Janssen P.",
-            fg="black", bg="white",
-            font=("Arial", 16, "bold")
+            **LABEL_STYLE
         ).grid(row=3, column=1, padx=5)
         tk.Label(
             ctrl, text="Submitted to:",
-            fg="black", bg="white",
-            font=("Arial", 16, "bold")
+            **LABEL_STYLE
         ).grid(row=4, column=0, pady=20)
         tk.Label(
             ctrl, text="Jo Anne Cura",
-            fg="black", bg="white",
-            font=("Arial", 16, "bold")
+            **LABEL_STYLE
         ).grid(row=4, column=1, pady=20)
         
+        link1 = create_link_label(
+            self, 
+            "Visit Git Repo",
+            "https://github.com/Ensues/OS-Case-Study"
+        )     
+        link1.pack(pady=50)   
         
 class SimulatorFrame(tk.Frame):
     """
