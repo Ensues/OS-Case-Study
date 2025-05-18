@@ -34,7 +34,7 @@ class App(tk.Tk):
 
         # Create and store frames
         self.frames = {}
-        for F in (LoadingFrame, MainMenuFrame, SimulatorFrame):
+        for F in (LoadingFrame, MainMenuFrame, SimulatorFrame, EasterEggFrame):
             frame = F(parent=self, controller=self)
             self.frames[F] = frame
             frame.place(relwidth=1, relheight=1)
@@ -91,13 +91,21 @@ class MainMenuFrame(tk.Frame):
         super().__init__(parent, bg="white")
         self.controller = controller
 
-        # Title label
-        title = tk.Label(
+        # Title Easter Egg
+        title = tk.Button(
             self,
+            command=lambda: controller.show_frame(EasterEggFrame),
             text="Simulator",
             font=("Arial", 32, "bold"),
-            fg="black",
-            bg="white"
+            foreground="black",
+            background="white",
+            activebackground="black",
+            activeforeground="white",
+            highlightthickness= 1,
+            highlightbackground="black",
+            highlightcolo="black",
+            borderwidth=0,
+            cursor="hand1",
         )
         title.pack(pady=200)
 
@@ -123,7 +131,84 @@ class MainMenuFrame(tk.Frame):
         )
         exit_btn.grid(row=0, column=1, padx=20)
 
+class EasterEggFrame(tk.Frame):
+    def __init__(self, parent, controller):
+        super().__init__(parent, bg="white")
+        self.controller = controller
+        
+        # Return to menu button at top-left
+        back_btn = tk.Button(
+            self,
+            text="←",
+            command=lambda: controller.show_frame(MainMenuFrame),
+            **BUTTON_STYLE
+        )
+        back_btn.place(x=10, y=10)
 
+        title = tk.Label(
+            self,
+            text="CREDITS",
+            font=("Arial", 32, "bold"),
+            fg="black",
+            bg="white"
+        )
+        title.pack(pady=50)
+        
+        ctrl = tk.Frame(self, bg="white")
+        ctrl.pack(pady=40)
+        
+        tk.Label(
+            ctrl, text="Tech Lead:",
+            fg="black", bg="white",
+            font=("Arial", 16, "bold")
+        ).grid(row=0, column=0, padx=5)
+        tk.Label(
+            ctrl, text="Quiambao, Eric Janssen P.",
+            fg="black", bg="white",
+            font=("Arial", 16, "bold")
+        ).grid(row=0, column=1, padx=5)
+        tk.Label(
+            ctrl, text="Programmer:",
+            fg="black", bg="white",
+            font=("Arial", 16, "bold")
+        ).grid(row=1, column=0, padx=5)
+        tk.Label(
+            ctrl, text="Quiambao, Eric Janssen P.",
+            fg="black", bg="white",
+            font=("Arial", 16, "bold")
+        ).grid(row=1, column=1, padx=5)
+        tk.Label(
+            ctrl, text="Designer:",
+            fg="black", bg="white",
+            font=("Arial", 16, "bold")
+        ).grid(row=2, column=0, padx=5)
+        tk.Label(
+            ctrl, text="Quiambao, Eric Janssen P.",
+            fg="black", bg="white",
+            font=("Arial", 16, "bold")
+        ).grid(row=2, column=1, padx=5)
+        tk.Label(
+            ctrl, text="Special Mention:",
+            fg="black", bg="white",
+            font=("Arial", 16, "bold")
+        ).grid(row=3, column=0, padx=5)
+        tk.Label(
+            ctrl, text="Quiambao, Eric Janssen P.",
+            fg="black", bg="white",
+            font=("Arial", 16, "bold")
+        ).grid(row=3, column=1, padx=5)
+        tk.Label(
+            ctrl, text="Submitted to:",
+            fg="black", bg="white",
+            font=("Arial", 16, "bold")
+        ).grid(row=4, column=0, pady=20)
+        tk.Label(
+            ctrl, text="Jo Anne Cura",
+            fg="black", bg="white",
+            font=("Arial", 16, "bold")
+        ).grid(row=4, column=1, pady=20)
+        
+        
 class SimulatorFrame(tk.Frame):
     """
     Integrated Page Replacement Simulator.
@@ -170,26 +255,26 @@ class SimulatorFrame(tk.Frame):
             text="CLEAR",
             command=self.clear,
             **BUTTON_STYLE
-        ).grid(row=1, column=0, pady=5, padx=5)
+        ).grid(row=1, column=0, pady=10, padx=5)
         # Algorithm Buttons
         tk.Button(
             ctrl,
             text="Start FIFO",
             command=self.start_fifo,
             **BUTTON_STYLE
-        ).grid(row=1, column=1, pady=5, padx=5)
+        ).grid(row=1, column=1, pady=10, padx=5)
         tk.Button(
             ctrl,
             text="Start LRU",
             command=self.start_lru,
             **BUTTON_STYLE
-        ).grid(row=1, column=2, pady=5, padx=5)
+        ).grid(row=1, column=2, pady=10, padx=5)
         tk.Button(
             ctrl,
             text="Start OPT",
             command=self.start_opt,
             **BUTTON_STYLE
-        ).grid(row=1, column=3, pady=5, padx=5)
+        ).grid(row=1, column=3, pady=10, padx=5)
 
         # Canvas area
         self.canvas = tk.Canvas(
