@@ -13,6 +13,8 @@ ANIMATION_STEPS = 20   # Number of steps in the move animation.
 MAX_FRAMES_ALLOWED = 9
 MAX_REF_LENGTH = 30
 
+# 
+
 HIDDEN_BUTTON_STYLE = {
     'foreground': 'black',
     'background': 'white',
@@ -444,6 +446,12 @@ class SimulatorFrame(tk.Frame):
         self.status.config(text=f"Ref String: {self.reference_string}")
         self.canvas.create_text(
             400, 20,
+            text=f"{self.algorithm}",
+            font=("Arial",20),
+            tags=("ref","frames")
+        )
+        self.canvas.create_text(
+            400, 50,
             text="Ref String: "+str(self.reference_string),
             font=("Arial",14),
             tags=("ref","frames")
@@ -493,7 +501,7 @@ class SimulatorFrame(tk.Frame):
                 self.animate(page, idx)
 
     def animate(self, page, frame_idx):
-        start_x, start_y = 50, 550
+        start_x, start_y = 400, 500
         moving = self.canvas.create_text(start_x, start_y, text=str(page), font=("Arial",16), fill="red")
         rect, txt = self.frame_boxes[frame_idx]
         coords=self.canvas.coords(rect)
