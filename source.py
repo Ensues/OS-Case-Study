@@ -17,10 +17,10 @@ BUTTON_STYLE = {
     'background': 'black',
     'activebackground': 'white',
     'activeforeground': 'black',
-    'highlightthickness': 2,
+    'highlightthickness': 3,
     'highlightbackground': 'black',
     'highlightcolor': 'black',
-    'borderwidth': 0,
+    'borderwidth': 3,
     'cursor': 'hand1',
     'font': ('Arial', 16, 'bold')
 }
@@ -136,7 +136,7 @@ class SimulatorFrame(tk.Frame):
         # Return to menu button at top-left
         back_btn = tk.Button(
             self,
-            text="← Menu",
+            text="←",
             command=lambda: controller.show_frame(MainMenuFrame),
             **BUTTON_STYLE
         )
@@ -151,37 +151,45 @@ class SimulatorFrame(tk.Frame):
             fg="black", bg="white",
             font=("Arial", 11)
         ).grid(row=0, column=0, padx=5)
-        self.frames_entry = tk.Entry(ctrl, width=5)
+        self.frames_entry = tk.Entry(ctrl, width=5, font=("Arial", 11))
         self.frames_entry.insert(0, "3")
         self.frames_entry.grid(row=0, column=1, padx=5)
 
         tk.Label(
             ctrl, text="Reference Length (1-30):",
-            fg="black", bg="white"
+            fg="black", bg="white",
+            font=("Arial", 11)
         ).grid(row=0, column=2, padx=5)
-        self.length_entry = tk.Entry(ctrl, width=5)
+        self.length_entry = tk.Entry(ctrl, width=5, font=("Arial", 11))
         self.length_entry.insert(0, "10")
         self.length_entry.grid(row=0, column=3, padx=5)
 
-        # Algorithm buttons
+        # Clear Button
+        tk.Button(
+            ctrl,
+            text="CLEAR",
+            command=self.clear,
+            **BUTTON_STYLE
+        ).grid(row=1, column=0, pady=5, padx=5)
+        # Algorithm Buttons
         tk.Button(
             ctrl,
             text="Start FIFO",
             command=self.start_fifo,
             **BUTTON_STYLE
-        ).grid(row=1, column=0, pady=5, padx=5)
+        ).grid(row=1, column=1, pady=5, padx=5)
         tk.Button(
             ctrl,
             text="Start LRU",
             command=self.start_lru,
             **BUTTON_STYLE
-        ).grid(row=1, column=1, pady=5, padx=5)
+        ).grid(row=1, column=2, pady=5, padx=5)
         tk.Button(
             ctrl,
             text="Start OPT",
             command=self.start_opt,
             **BUTTON_STYLE
-        ).grid(row=1, column=2, pady=5, padx=5)
+        ).grid(row=1, column=3, pady=5, padx=5)
 
         # Canvas area
         self.canvas = tk.Canvas(
@@ -259,22 +267,27 @@ class SimulatorFrame(tk.Frame):
         self.status.config(text="Status: Invalid input, simulation aborted.")
 
     def start_fifo(self):
-        self.algorithm = "FIFO"
-        # clear canvas
         self.canvas.delete("all")
+        self.algorithm = "FIFO"
+        self.status.config(text="FIFO Algorithm starting")
         self.start_sim()
 
     def start_lru(self):
-        self.algorithm = "LRU"
-        # clear canvas
         self.canvas.delete("all")
+        self.algorithm = "LRU"
+        self.status.config(text="LRU Algorithm starting")
         self.start_sim()
 
     def start_opt(self):
-        self.algorithm = "OPT"
-        # clear canvas
         self.canvas.delete("all")
+        self.algorithm = "OPT"
+        self.status.config(text="OPT Algorithm starting")
         self.start_sim()
+        
+    def clear(self):
+        # clear canvas 
+        self.canvas.delete("all")
+        self.status.config(text="Simulation Interrupted")
 
     def start_sim(self):
         """Initialize simulation and display reference string if inputs valid."""
