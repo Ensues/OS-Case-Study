@@ -12,26 +12,38 @@ ANIMATION_STEPS = 20   # Number of steps in the move animation.
 MAX_FRAMES_ALLOWED = 9
 MAX_REF_LENGTH = 30
 
+BUTTON_STYLE = {
+    'foreground': 'white',
+    'background': 'black',
+    'activebackground': 'white',
+    'activeforeground': 'black',
+    'highlightthickness': 2,
+    'highlightbackground': 'black',
+    'highlightcolor': 'black',
+    'borderwidth': 0,
+    'cursor': 'hand1',
+    'font': ('Arial', 16, 'bold')
+}
+
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
-        # Core window setup
-        self.title("Sorting Simulator")
-        self.configure(bg="black")
+        self.title("Simulator Application")
         self.geometry("800x600")
         self.resizable(False, False)
 
-        # Frame registry
+        # Create and store frames
         self.frames = {}
         for F in (LoadingFrame, MainMenuFrame, SimulatorFrame):
             frame = F(parent=self, controller=self)
             self.frames[F] = frame
             frame.place(relwidth=1, relheight=1)
 
+        # Start with loading screen
         self.show_frame(LoadingFrame)
 
     def show_frame(self, frame_class):
-        """Raise the requested frame to the front."""
+        """Bring the given frame to the front."""
         frame = self.frames[frame_class]
         frame.tkraise()
 
@@ -41,33 +53,34 @@ class LoadingFrame(tk.Frame):
         super().__init__(parent, bg="white")
         self.controller = controller
         
-        # Title
+        # Title label
         title = tk.Label(
-            self, text="Loading...",
-            font=("Arial", 24, "bold"),
-            foreground="black",
-            background="white",
+            self,
+            text="Loading",
+            font=("Arial", 32, "bold"),
+            fg="black",
+            bg="white"
         )
-        title.pack(pady=40)
+        title.pack(pady=200)
 
-        # Canvas-based progress bar
+        # Progress bar background
         self.canvas = tk.Canvas(self, bg="white", highlightthickness=0)
         self.canvas.place(relx=0.1, rely=0.8, relwidth=0.8, relheight=0.05)
 
-        # Outline and fill rectangles
-        self.canvas.create_rectangle(0, 0, 700, 20, outline="black")
+        # Draw outline
+        self.canvas.create_rectangle(0, 0, 700, 30, outline="black")
         self.bar = self.canvas.create_rectangle(0, 0, 0, 30, fill="black", width=0)
 
-        # Start animating
         self.progress = 0
         self.max_width = 700
-        self.step = self.max_width // 100  
+        self.step = self.max_width // 100
         self.animate()
 
     def animate(self):
+        """Fill the bar and switch to main menu when done."""
         if self.progress < self.max_width:
             self.progress += self.step
-            self.canvas.coords(self.bar, 0, 0, self.progress, 20)
+            self.canvas.coords(self.bar, 0, 0, self.progress, 30)
             self.after(30, self.animate)
         else:
             self.controller.show_frame(MainMenuFrame)
@@ -78,58 +91,37 @@ class MainMenuFrame(tk.Frame):
         super().__init__(parent, bg="white")
         self.controller = controller
 
-        # Title
+        # Title label
         title = tk.Label(
-            self, text="Sorting Simulator",
-            font=("Arial", 24, "bold"),
-            fg="black", bg="white"
+            self,
+            text="Simulator",
+            font=("Arial", 32, "bold"),
+            fg="black",
+            bg="white"
         )
-        title.pack(pady=40)
+        title.pack(pady=200)
 
-        # Buttons frame for alignment
+        # Button container
         btn_frame = tk.Frame(self, bg="white")
-        btn_frame.pack(pady=20)
+        btn_frame.pack()
 
         # Play button → transitions to blank frame
         play_btn = tk.Button(
             btn_frame,
             command=lambda: controller.show_frame(SimulatorFrame),
-            foreground="white",
-            background="black",
-            activebackground="white",
-            activeforeground="black",
-            highlightthickness=2,
-            highlightbackground="black",
-            highlightcolor="black",
-            width=10, 
-            height=1,
-            border=0,
-            cursor='hand1',
             text="Play",
-            font=('Arial', 16, 'bold')
+            **BUTTON_STYLE
         )
-        play_btn.grid(row=0, column=0, padx=10)
+        play_btn.grid(row=0, column=0, padx=20)
 
         # Exit button → clean shutdown
         exit_btn = tk.Button(
             btn_frame,
             command=self.quit,
-            foreground="white",
-            background="black",
-            activebackground="white",
-            activeforeground="black",
-            highlightthickness=2,
-            highlightbackground="black",
-            highlightcolor="black",
-            width=10, 
-            height=1,
-            border=0,
-            cursor='hand1',
             text="Exit",
-            font=('Arial', 16, 'bold')
+            **BUTTON_STYLE
         )
-        exit_btn.grid(row=0, column=1, padx=10)
-
+        exit_btn.grid(row=0, column=1, padx=20)
 
 
 class SimulatorFrame(tk.Frame):
@@ -142,37 +134,71 @@ class SimulatorFrame(tk.Frame):
         self.controller = controller
 
         # Return to menu button at top-left
-        back_btn = tk.Button(self, text="← Menu", fg="white", bg="black",
-                             command=lambda: controller.show_frame(MainMenuFrame))
+        back_btn = tk.Button(
+            self,
+            text="← Menu",
+            command=lambda: controller.show_frame(MainMenuFrame),
+            **BUTTON_STYLE
+        )
         back_btn.place(x=10, y=10)
 
         # Controls frame on top
         ctrl = tk.Frame(self, bg="white")
         ctrl.pack(pady=40)
 
-        tk.Label(ctrl, text="Number of Frames (1-9):", fg="black", bg="white").grid(row=0, column=0, padx=5)
+        tk.Label(
+            ctrl, text="Number of Frames (1-9):",
+            fg="black", bg="white",
+            font=("Arial", 11)
+        ).grid(row=0, column=0, padx=5)
         self.frames_entry = tk.Entry(ctrl, width=5)
         self.frames_entry.insert(0, "3")
         self.frames_entry.grid(row=0, column=1, padx=5)
 
-        tk.Label(ctrl, text="Reference Length (1-30):", fg="black", bg="white").grid(row=0, column=2, padx=5)
+        tk.Label(
+            ctrl, text="Reference Length (1-30):",
+            fg="black", bg="white"
+        ).grid(row=0, column=2, padx=5)
         self.length_entry = tk.Entry(ctrl, width=5)
         self.length_entry.insert(0, "10")
         self.length_entry.grid(row=0, column=3, padx=5)
 
-        tk.Button(ctrl, text="Start FIFO", fg="white", bg="black",
-                  command=self.start_fifo).grid(row=1, column=0, pady=5, padx=5)
-        tk.Button(ctrl, text="Start LRU", fg="white", bg="black",
-                  command=self.start_lru).grid(row=1, column=1, pady=5, padx=5)
-        tk.Button(ctrl, text="Start OPT", fg="white", bg="black",
-                  command=self.start_opt).grid(row=1, column=2, pady=5, padx=5)
+        # Algorithm buttons
+        tk.Button(
+            ctrl,
+            text="Start FIFO",
+            command=self.start_fifo,
+            **BUTTON_STYLE
+        ).grid(row=1, column=0, pady=5, padx=5)
+        tk.Button(
+            ctrl,
+            text="Start LRU",
+            command=self.start_lru,
+            **BUTTON_STYLE
+        ).grid(row=1, column=1, pady=5, padx=5)
+        tk.Button(
+            ctrl,
+            text="Start OPT",
+            command=self.start_opt,
+            **BUTTON_STYLE
+        ).grid(row=1, column=2, pady=5, padx=5)
 
         # Canvas area
-        self.canvas = tk.Canvas(self, width=780, height=350, bg="white", highlightthickness=1, highlightbackground="black")
+        self.canvas = tk.Canvas(
+            self,
+            width=780, height=350,
+            bg="white",
+            highlightthickness=1,
+            highlightbackground="black"
+        )
         self.canvas.pack(pady=10)
 
         # Status label
-        self.status = tk.Label(self, text="Status: Ready", fg="black", bg="white")
+        self.status = tk.Label(
+            self,
+            text="Status: Ready",
+            fg="black", bg="white"
+        )
         self.status.pack(pady=5)
 
         # Simulation state
@@ -189,13 +215,23 @@ class SimulatorFrame(tk.Frame):
         self.frame_boxes = []
 
     def setup_frames(self):
-        self.canvas.delete("frame_box")
+        self.canvas.delete("frames")
+        self.canvas.delete("ref")
+        self.canvas.delete("warning")
         self.frame_boxes.clear()
         for i in range(self.max_frames):
             x = START_X + i * (FRAME_WIDTH + FRAME_SPACING)
             y = START_Y
-            rect = self.canvas.create_rectangle(x, y, x+FRAME_WIDTH, y+FRAME_HEIGHT, fill="lightgrey", tags="frame_box")
-            txt = self.canvas.create_text(x+FRAME_WIDTH/2, y+FRAME_HEIGHT/2, text="", font=("Arial", 16), tags="frame_box")
+            rect = self.canvas.create_rectangle(
+                x, y, x+FRAME_WIDTH, y+FRAME_HEIGHT,
+                fill="lightgrey",
+                tags=("frame_box","frames")
+            )
+            txt = self.canvas.create_text(
+                x+FRAME_WIDTH/2, y+FRAME_HEIGHT/2,
+                text="", font=("Arial", 16),
+                tags=("frame_box","frames")
+            )
             self.frame_boxes.append((rect, txt))
 
     def validate_inputs(self):
@@ -209,21 +245,35 @@ class SimulatorFrame(tk.Frame):
 
     def show_warning(self):
         """Display warning on canvas and update status."""
+        # clear canvas
         self.canvas.delete("all")
         warning = f"Inputs out of range!\nFrames: 1-{MAX_FRAMES_ALLOWED}, Length: 1-{MAX_REF_LENGTH}"
-        self.canvas.create_text(390, 175, text=warning, font=("Arial", 16), fill="red", justify="center")
+        self.canvas.create_text(
+            390, 175,
+            text=warning,
+            font=("Arial", 16),
+            fill="red",
+            justify="center",
+            tags="warning"
+        )
         self.status.config(text="Status: Invalid input, simulation aborted.")
 
     def start_fifo(self):
         self.algorithm = "FIFO"
+        # clear canvas
+        self.canvas.delete("all")
         self.start_sim()
 
     def start_lru(self):
         self.algorithm = "LRU"
+        # clear canvas
+        self.canvas.delete("all")
         self.start_sim()
 
     def start_opt(self):
         self.algorithm = "OPT"
+        # clear canvas
+        self.canvas.delete("all")
         self.start_sim()
 
     def start_sim(self):
@@ -233,8 +283,8 @@ class SimulatorFrame(tk.Frame):
             self.show_warning()
             return
 
-        # Clear any previous warning elements
-        self.canvas.delete("all")
+        # Clear warning only
+        self.canvas.delete("warning")
         self.status.config(text="Status: Ready")
 
         # Read values
@@ -249,7 +299,12 @@ class SimulatorFrame(tk.Frame):
         self.lru_order.clear()
         self.current = 0
         self.status.config(text=f"Ref String: {self.reference_string}")
-        self.canvas.create_text(400, 20, text="Ref String: "+str(self.reference_string), font=("Arial",14), tags="ref")
+        self.canvas.create_text(
+            400, 20,
+            text="Ref String: "+str(self.reference_string),
+            font=("Arial",14),
+            tags=("ref","frames")
+        )
         self.after(1000, self.next_step)
 
     def next_step(self):
@@ -320,7 +375,7 @@ class SimulatorFrame(tk.Frame):
         self.canvas.itemconfig(rect, fill=color)
         self.after(300, lambda: self.canvas.itemconfig(rect, fill=orig))
 
+
 if __name__ == "__main__":
-    # Entry point
     app = App()
     app.mainloop()
