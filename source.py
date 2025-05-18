@@ -274,7 +274,7 @@ class SimulatorFrame(tk.Frame):
 
         # Controls frame on top
         ctrl = tk.Frame(self, bg="white")
-        ctrl.pack(pady=40)
+        ctrl.pack(pady=20)
 
         tk.Label(
             ctrl, text="Number of Frames (1-9):",
@@ -324,7 +324,7 @@ class SimulatorFrame(tk.Frame):
         # Canvas area
         self.canvas = tk.Canvas(
             self,
-            width=780, height=350,
+            width=780, height=400,
             bg="white",
             highlightthickness=1,
             highlightbackground="black"
