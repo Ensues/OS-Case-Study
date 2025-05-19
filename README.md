@@ -1,5 +1,7 @@
 ## OS Case Study Simulator
 
+<img alt="Python" src="https://img.shields.io/badge/-Python-3670A0?style=flat-square&logo=python&logoColor=ffdd54" />
+
 **Overview**
 
 This repository delivers a Tkinter-based page replacement algorithm simulator designed to visualize **FIFO**, **LRU**, and **OPT** strategies. This is a case study for the subject Operating Systems.
