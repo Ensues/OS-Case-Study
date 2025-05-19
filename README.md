@@ -2,7 +2,7 @@
 
 **Overview**
 
-This repository delivers a Tkinter-based page replacement algorithm simulator designed to visualize **FIFO**, **LRU**, and **OPT** strategies. It provides a streamlined UI for stakeholders to configure frame counts, reference string lengths, and observe real-time animations of page hits and faults.
+This repository delivers a Tkinter-based page replacement algorithm simulator designed to visualize **FIFO**, **LRU**, and **OPT** strategies. This is a case study for the subject Operating Systems.
 
 [⬇️ Get the latest Windows EXE](https://github.com/Ensues/OS-Case-Study/releases/download/v1.0.0/main.exe)
 
