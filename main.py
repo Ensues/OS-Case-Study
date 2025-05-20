@@ -1,6 +1,6 @@
 # Libraries
-
 import tkinter as tk
+from tkinter import ttk
 import random
 import webbrowser
 
@@ -329,14 +329,13 @@ class SimulatorFrame(tk.Frame):
         ).grid(row=1, column=3, pady=10, padx=5)
 
         # Canvas area
-        self.canvas = tk.Canvas(
-            self,
-            width=780, height=400,
-            bg="white",
-            highlightthickness=1,
-            highlightbackground="black"
-        )
-        self.canvas.pack(pady=10)
+        container = ttk.Frame(self)
+        container.pack(fill="both", expand=True, pady=10)
+        self.canvas = tk.Canvas(container, bg="white", height=300)
+        vsb = ttk.Scrollbar(container, orient="vertical", command=self.canvas.yview)
+        self.canvas.configure(yscrollcommand=vsb.set)
+        vsb.pack(side="right", fill="y")
+        self.canvas.pack(side="left", fill="both", expand=True)
 
         # Status label
         self.status = tk.Label(
@@ -358,7 +357,8 @@ class SimulatorFrame(tk.Frame):
         self.reference_string = []
         self.current = 0
         self.algorithm = None
-        self.frame_boxes = []
+        self.frame_history = []
+        self.canvas.delete("all")
 
     # Simulation set up frames 
     def setup_frames(self):
@@ -384,92 +384,54 @@ class SimulatorFrame(tk.Frame):
     # Check if user inputs are within allowed ranges 
     def validate_inputs(self):
         try:
-            frames = int(self.frames_entry.get())
-            length = int(self.length_entry.get())
+            f = int(self.frames_entry.get())
+            l = int(self.length_entry.get())
         except ValueError:
             return False
-        return 1 <= frames <= MAX_FRAMES_ALLOWED and 1 <= length <= MAX_REF_LENGTH
+        return 1 <= f <= MAX_FRAMES_ALLOWED and 1 <= l <= MAX_REF_LENGTH
 
     # Display warning on canvas and update status if validate_inputs return false
     def show_warning(self):
-        # clear canvas
         self.canvas.delete("all")
         warning = f"Inputs out of range!\nFrames: 1-{MAX_FRAMES_ALLOWED}, Length: 1-{MAX_REF_LENGTH}"
-        self.canvas.create_text(
-            390, 175,
-            text=warning,
-            font=("Arial", 16),
-            fill="red",
-            justify="center",
-            tags="warning"
-        )
+        self.canvas.create_text(390, 175, text=warning, font=("Arial", 16), fill="red")
         self.status.config(text="Status: Invalid input, simulation aborted.")
 
     # Function to call the start of FIFO, assigns the agroithm for FIFO also
     def start_fifo(self):
-        self.canvas.delete("all")
         self.algorithm = "FIFO"
-        self.status.config(text="FIFO Algorithm starting")
+        self.status.config(text="FIFO starting")
         self.start_sim()
     
     # Function to call the start of LRU, assigns the agroithm for LRU also
     def start_lru(self):
-        self.canvas.delete("all")
         self.algorithm = "LRU"
-        self.status.config(text="LRU Algorithm starting")
+        self.status.config(text="LRU starting")
         self.start_sim()
-
+        
     # Function to call the start of OPT, assigns the agroithm for OPT also
     def start_opt(self):
-        self.canvas.delete("all")
         self.algorithm = "OPT"
-        self.status.config(text="OPT Algorithm starting")
+        self.status.config(text="OPT starting")
         self.start_sim()
         
     # Function to clear canvas and stop simulation
     def clear(self):
-        # clear canvas 
-        self.canvas.delete("all")
         self.reset_state()
         self.status.config(text="Simulation Interrupted")
 
     # Initialize simulation and display reference string if inputs valid
     def start_sim(self):
-        # Validate before proceeding
         if not self.validate_inputs():
             self.show_warning()
             return
-
-        # Clear warning only
-        self.canvas.delete("warning")
-        self.status.config(text="Status: Ready")
-
-        # Read values
+        self.reset_state()
         self.max_frames = int(self.frames_entry.get())
         length = int(self.length_entry.get())
-
-        self.setup_frames()
-        
-        # Generate reference string through random library
-        self.reference_string = [random.randint(0,9) for _ in range(length)]
-        self.frames = [None]*self.max_frames
-        self.fifo_queue.clear()
-        self.lru_order.clear()
-        self.current = 0
+        self.reference_string = [random.randint(0, 9) for _ in range(length)]
+        self.frames = [None] * self.max_frames
         self.status.config(text=f"Ref String: {self.reference_string}")
-        self.canvas.create_text(
-            400, 20,
-            text=f"{self.algorithm}",
-            font=("Arial",20),
-            tags=("ref","frames")
-        )
-        self.canvas.create_text(
-            400, 50,
-            text="Ref String: "+str(self.reference_string),
-            font=("Arial",14),
-            tags=("ref","frames")
-        )
-        self.after(1000, self.next_step)
+        self.after(500, self.next_step)
 
     # Function of the algorithms that will repeat until finish 
     def next_step(self):
@@ -477,69 +439,65 @@ class SimulatorFrame(tk.Frame):
             self.status.config(text="Simulation complete")
             return
         page = self.reference_string[self.current]
-        self.status.config(text=f"Processing {page} ({self.algorithm})")
+
         if page in self.frames:
             idx = self.frames.index(page)
-            self.highlight(idx, "green")
-            if self.algorithm=="LRU":
+            if self.algorithm == "LRU":
                 self.lru_order.remove(idx)
                 self.lru_order.append(idx)
-            self.current +=1
-            self.after(1000, self.next_step)
+            self.current += 1
         else:
             if None in self.frames:
                 idx = self.frames.index(None)
-                self.frames[idx]=page
-                if self.algorithm=="FIFO": self.fifo_queue.append(idx)
-                if self.algorithm=="LRU": self.lru_order.append(idx)
-                self.animate(page, idx)
-            else:
-                if self.algorithm=="FIFO":
-                    idx=self.fifo_queue.pop(0)
-                    self.frames[idx]=page
+                self.frames[idx] = page
+                if self.algorithm == "FIFO":
                     self.fifo_queue.append(idx)
-                elif self.algorithm=="LRU":
-                    idx=self.lru_order.pop(0)
-                    self.frames[idx]=page
+                if self.algorithm == "LRU":
+                    self.lru_order.append(idx)
+                self.current += 1
+            else:
+                if self.algorithm == "FIFO":
+                    idx = self.fifo_queue.pop(0)
+                    self.frames[idx] = page
+                    self.fifo_queue.append(idx)
+                elif self.algorithm == "LRU":
+                    idx = self.lru_order.pop(0)
+                    self.frames[idx] = page
                     self.lru_order.append(idx)
                 else:  # OPT
-                    future=[]
-                    for i in range(self.max_frames):
+                    future = []
+                    for f in self.frames:
                         try:
-                            next_use=self.reference_string[self.current+1:].index(self.frames[i])
+                            dist = self.reference_string[self.current+1:].index(f)
                         except ValueError:
-                            next_use=float('inf')
-                        future.append(next_use)
-                    idx=future.index(max(future))
-                    self.frames[idx]=page
-                self.animate(page, idx)
+                            dist = float('inf')
+                        future.append(dist)
+                    idx = future.index(max(future))
+                    self.frames[idx] = page
+                self.current += 1
 
-    # Animation function for visual feedback
-    def animate(self, page, frame_idx):
-        start_x, start_y = 400, 500
-        moving = self.canvas.create_text(start_x, start_y, text=str(page), font=("Arial",16), fill="red")
-        rect, txt = self.frame_boxes[frame_idx]
-        coords=self.canvas.coords(rect)
-        tx=(coords[0]+coords[2])/2
-        ty=(coords[1]+coords[3])/2
-        dx=(tx-start_x)/ANIMATION_STEPS
-        dy=(ty-start_y)/ANIMATION_STEPS
-        def step(i=0):
-            if i<ANIMATION_STEPS:
-                self.canvas.move(moving, dx, dy)
-                self.after(ANIMATION_DELAY, step, i+1)
-            else:
-                self.canvas.itemconfig(txt, text=str(page))
-                self.canvas.delete(moving)
-                self.current+=1
-                self.after(500, self.next_step)
-        step()
-
-    def highlight(self, idx, color):
-        rect, _ = self.frame_boxes[idx]
-        orig = self.canvas.itemcget(rect, "fill")
-        self.canvas.itemconfig(rect, fill=color)
-        self.after(300, lambda: self.canvas.itemconfig(rect, fill=orig))
+        # Record snapshot and redraw
+        self.frame_history.append(self.frames.copy())
+        self.draw_frame_history()
+        self.after(300, self.next_step)
+        
+    def draw_frame_history(self):
+        self.canvas.delete("all")
+        for t, snapshot in enumerate(self.frame_history):
+            y_offset = START_Y + t * (FRAME_HEIGHT + FRAME_SPACING)
+            for i, val in enumerate(snapshot):
+                x = START_X + i * (FRAME_WIDTH + FRAME_SPACING)
+                self.canvas.create_rectangle(
+                    x, y_offset, x + FRAME_WIDTH, y_offset + FRAME_HEIGHT,
+                    fill="lightgrey"
+                )
+                self.canvas.create_text(
+                    x + FRAME_WIDTH / 2, y_offset + FRAME_HEIGHT / 2,
+                    text=str(val) if val is not None else "",
+                    font=("Arial", 16)
+                )
+        total_height = START_Y + len(self.frame_history) * (FRAME_HEIGHT + FRAME_SPACING)
+        self.canvas.config(scrollregion=(0, 0, 800, total_height))
 
 # app start
 if __name__ == "__main__":
