@@ -91,6 +91,7 @@ This repository delivers a Tkinter-based page replacement algorithm simulator de
 ```
 ├── main.py            # Entry point and frame-controller
 ├── main.spec          # PyInstaller build script for generating the standalone executable
+├── LICENSE            # MIT License
 ├── README.md          # This document
 ├── dist/              # Compiled executable (post-build)
 ├── documentation/     # Paper documentation
