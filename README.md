@@ -11,7 +11,7 @@
 
 This repository delivers a Tkinter-based page replacement algorithm simulator designed to visualize **FIFO**, **LRU**, and **OPT** strategies. This is a case study for the subject Operating Systems.
 
-[⬇️ Get the latest Windows EXE](https://github.com/Ensues/OS-Case-Study/releases/download/v1.0.1/main.exe)
+[⬇️ Get the latest Windows EXE](https://github.com/Ensues/OS-Case-Study/releases/download/v1.0.2/main.exe)
 
 ---
 
