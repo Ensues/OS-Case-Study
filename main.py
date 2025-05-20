@@ -78,7 +78,7 @@ class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Simulator Application")
-        self.geometry("800x600")
+        self.geometry("1024x640")
         self.resizable(False, False)
 
         # Create and store frames
@@ -117,11 +117,11 @@ class LoadingFrame(tk.Frame):
         self.canvas.place(relx=0.1, rely=0.8, relwidth=0.8, relheight=0.05)
 
         # Draw outline
-        self.canvas.create_rectangle(0, 0, 700, 30, outline="black")
+        self.canvas.create_rectangle(0, 0, 818, 30, outline="black")
         self.bar = self.canvas.create_rectangle(0, 0, 0, 30, fill="black", width=0)
         self.progress = 0
-        self.max_width = 700
-        self.step = self.max_width // 125
+        self.max_width = 900
+        self.step = self.max_width // 150
         self.animate()
 
     # Fills the bar and switch to main menu when done
@@ -152,7 +152,7 @@ class MainMenuFrame(tk.Frame):
         title = tk.Button(
             self,
             command=lambda: controller.show_frame(CreditsFrame),
-            text="Simulator",
+            text="The Simulator",
             **HIDDEN_BUTTON_STYLE
         )
         title.pack(pady=200)
@@ -342,7 +342,7 @@ class SimulatorFrame(tk.Frame):
         self.status = tk.Label(
             self,
             text="Status: Ready",
-            fg="black", bg="white"
+            **BUTTON_STYLE
         )
         self.status.pack(pady=5)
 
