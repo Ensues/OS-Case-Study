@@ -113,4 +113,4 @@ Distributed under the MIT License. See `LICENSE` for full terms.
 
 ---
 
-**OS Case Study Simulator** • Ensues Development Team
+**OS Case Study Simulator** • Ensues
