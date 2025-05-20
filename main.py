@@ -1,3 +1,5 @@
+# Libraries
+
 import tkinter as tk
 import random
 import webbrowser
@@ -8,12 +10,12 @@ FRAME_HEIGHT = 60
 FRAME_SPACING = 20
 START_X = 50
 START_Y = 150
-ANIMATION_DELAY = 50   # Time delay (ms) between animation moves.
-ANIMATION_STEPS = 20   # Number of steps in the move animation.
+ANIMATION_DELAY = 50  
+ANIMATION_STEPS = 25
 MAX_FRAMES_ALLOWED = 9
 MAX_REF_LENGTH = 30
 
-# 
+# Button and label styling for less repetitiveness 
 
 HIDDEN_BUTTON_STYLE = {
     'foreground': 'black',
@@ -47,6 +49,8 @@ LABEL_STYLE = {
     'font': ('Arial', 16, 'bold')
 }
 
+# Link opening function
+
 def open_link(url):
     webbrowser.open_new(url)
 
@@ -69,6 +73,7 @@ def create_link_label(parent, text, url):
     link_label.bind("<Button-1>", lambda e: open_link(url))
     return link_label
 
+# Main application instantiation
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -86,12 +91,12 @@ class App(tk.Tk):
         # Start with loading screen
         self.show_frame(LoadingFrame)
 
+    # Shows the frame
     def show_frame(self, frame_class):
-        """Bring the given frame to the front."""
         frame = self.frames[frame_class]
         frame.tkraise()
 
-
+# Instantiation of loading screen frame
 class LoadingFrame(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent, bg="white")
@@ -114,14 +119,13 @@ class LoadingFrame(tk.Frame):
         # Draw outline
         self.canvas.create_rectangle(0, 0, 700, 30, outline="black")
         self.bar = self.canvas.create_rectangle(0, 0, 0, 30, fill="black", width=0)
-
         self.progress = 0
         self.max_width = 700
         self.step = self.max_width // 125
         self.animate()
 
+    # Fills the bar and switch to main menu when done
     def animate(self):
-        """Fill the bar and switch to main menu when done."""
         if self.progress < self.max_width:
             self.progress += self.step
             self.canvas.coords(self.bar, 0, 0, self.progress, 30)
@@ -129,7 +133,7 @@ class LoadingFrame(tk.Frame):
         else:
             self.controller.show_frame(MainMenuFrame)
 
-
+# Instantiation of main menu frame
 class MainMenuFrame(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent, bg="white")
@@ -144,7 +148,7 @@ class MainMenuFrame(tk.Frame):
         )
         back_btn.place(x=10, y=10)
 
-        # Title Easter Egg
+        # Title Easter Egg Button
         title = tk.Button(
             self,
             command=lambda: controller.show_frame(CreditsFrame),
@@ -157,7 +161,7 @@ class MainMenuFrame(tk.Frame):
         btn_frame = tk.Frame(self, bg="white")
         btn_frame.pack()
 
-        # Play button → transitions to blank frame
+        # Play button → transitions to simulator frame
         play_btn = tk.Button(
             btn_frame,
             command=lambda: controller.show_frame(SimulatorFrame),
@@ -175,6 +179,7 @@ class MainMenuFrame(tk.Frame):
         )
         exit_btn.grid(row=0, column=1, padx=20)
 
+# Instantiation of credits frame, also includes the link to project repo
 class CreditsFrame(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent, bg="white")
@@ -249,6 +254,7 @@ class CreditsFrame(tk.Frame):
             **LABEL_STYLE
         ).grid(row=4, column=1, pady=20)
         
+        # Link to repo
         link1 = create_link_label(
             self, 
             "Visit Git Repo",
@@ -256,11 +262,8 @@ class CreditsFrame(tk.Frame):
         )     
         link1.pack(pady=50)   
         
+# Instantiation of simulator frame, where the magic happens
 class SimulatorFrame(tk.Frame):
-    """
-    Integrated Page Replacement Simulator.
-    Foreground elements are black, background is white.
-    """
     def __init__(self, parent, controller):
         super().__init__(parent, bg="white")
         self.controller = controller
@@ -278,6 +281,7 @@ class SimulatorFrame(tk.Frame):
         ctrl = tk.Frame(self, bg="white")
         ctrl.pack(pady=20)
 
+        # Frame / Pages label and input
         tk.Label(
             ctrl, text="Number of Frames (1-9):",
             fg="black", bg="white",
@@ -287,6 +291,7 @@ class SimulatorFrame(tk.Frame):
         self.frames_entry.insert(0, "3")
         self.frames_entry.grid(row=0, column=1, padx=5)
 
+        # Ref length label and input
         tk.Label(
             ctrl, text="Reference Length (1-30):",
             fg="black", bg="white",
@@ -296,7 +301,7 @@ class SimulatorFrame(tk.Frame):
         self.length_entry.insert(0, "10")
         self.length_entry.grid(row=0, column=3, padx=5)
 
-        # Clear Button
+        # Clear Button to stop the project mid process for the users disgression
         tk.Button(
             ctrl,
             text="CLEAR",
@@ -344,6 +349,7 @@ class SimulatorFrame(tk.Frame):
         # Simulation state
         self.reset_state()
 
+    # Simulation reset state 
     def reset_state(self):
         self.max_frames = 3
         self.frames = []
@@ -354,6 +360,7 @@ class SimulatorFrame(tk.Frame):
         self.algorithm = None
         self.frame_boxes = []
 
+    # Simulation set up frames 
     def setup_frames(self):
         self.canvas.delete("frames")
         self.canvas.delete("ref")
@@ -373,9 +380,9 @@ class SimulatorFrame(tk.Frame):
                 tags=("frame_box","frames")
             )
             self.frame_boxes.append((rect, txt))
-
+    
+    # Check if user inputs are within allowed ranges 
     def validate_inputs(self):
-        """Check if user inputs are within allowed ranges."""
         try:
             frames = int(self.frames_entry.get())
             length = int(self.length_entry.get())
@@ -383,8 +390,8 @@ class SimulatorFrame(tk.Frame):
             return False
         return 1 <= frames <= MAX_FRAMES_ALLOWED and 1 <= length <= MAX_REF_LENGTH
 
+    # Display warning on canvas and update status if validate_inputs return false
     def show_warning(self):
-        """Display warning on canvas and update status."""
         # clear canvas
         self.canvas.delete("all")
         warning = f"Inputs out of range!\nFrames: 1-{MAX_FRAMES_ALLOWED}, Length: 1-{MAX_REF_LENGTH}"
@@ -398,31 +405,36 @@ class SimulatorFrame(tk.Frame):
         )
         self.status.config(text="Status: Invalid input, simulation aborted.")
 
+    # Function to call the start of FIFO, assigns the agroithm for FIFO also
     def start_fifo(self):
         self.canvas.delete("all")
         self.algorithm = "FIFO"
         self.status.config(text="FIFO Algorithm starting")
         self.start_sim()
-
+    
+    # Function to call the start of LRU, assigns the agroithm for LRU also
     def start_lru(self):
         self.canvas.delete("all")
         self.algorithm = "LRU"
         self.status.config(text="LRU Algorithm starting")
         self.start_sim()
 
+    # Function to call the start of OPT, assigns the agroithm for OPT also
     def start_opt(self):
         self.canvas.delete("all")
         self.algorithm = "OPT"
         self.status.config(text="OPT Algorithm starting")
         self.start_sim()
         
+    # Function to clear canvas and stop simulation
     def clear(self):
         # clear canvas 
         self.canvas.delete("all")
+        self.reset_state()
         self.status.config(text="Simulation Interrupted")
 
+    # Initialize simulation and display reference string if inputs valid
     def start_sim(self):
-        """Initialize simulation and display reference string if inputs valid."""
         # Validate before proceeding
         if not self.validate_inputs():
             self.show_warning()
@@ -437,7 +449,8 @@ class SimulatorFrame(tk.Frame):
         length = int(self.length_entry.get())
 
         self.setup_frames()
-        # Generate reference string
+        
+        # Generate reference string through random library
         self.reference_string = [random.randint(0,9) for _ in range(length)]
         self.frames = [None]*self.max_frames
         self.fifo_queue.clear()
@@ -458,6 +471,7 @@ class SimulatorFrame(tk.Frame):
         )
         self.after(1000, self.next_step)
 
+    # Function of the algorithms that will repeat until finish 
     def next_step(self):
         if self.current >= len(self.reference_string):
             self.status.config(text="Simulation complete")
@@ -500,6 +514,7 @@ class SimulatorFrame(tk.Frame):
                     self.frames[idx]=page
                 self.animate(page, idx)
 
+    # Animation function for visual feedback
     def animate(self, page, frame_idx):
         start_x, start_y = 400, 500
         moving = self.canvas.create_text(start_x, start_y, text=str(page), font=("Arial",16), fill="red")
@@ -526,7 +541,7 @@ class SimulatorFrame(tk.Frame):
         self.canvas.itemconfig(rect, fill=color)
         self.after(300, lambda: self.canvas.itemconfig(rect, fill=orig))
 
-
+# app start
 if __name__ == "__main__":
     app = App()
     app.mainloop()
