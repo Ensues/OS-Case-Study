@@ -78,7 +78,7 @@ class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Simulator Application")
-        self.geometry("800x600")
+        self.geometry("1024x640")
         self.resizable(False, False)
 
         # Create and store frames
@@ -117,11 +117,11 @@ class LoadingFrame(tk.Frame):
         self.canvas.place(relx=0.1, rely=0.8, relwidth=0.8, relheight=0.05)
 
         # Draw outline
-        self.canvas.create_rectangle(0, 0, 700, 30, outline="black")
+        self.canvas.create_rectangle(0, 0, 818, 30, outline="black")
         self.bar = self.canvas.create_rectangle(0, 0, 0, 30, fill="black", width=0)
         self.progress = 0
-        self.max_width = 700
-        self.step = self.max_width // 125
+        self.max_width = 900
+        self.step = self.max_width // 150
         self.animate()
 
     # Fills the bar and switch to main menu when done
@@ -152,7 +152,7 @@ class MainMenuFrame(tk.Frame):
         title = tk.Button(
             self,
             command=lambda: controller.show_frame(CreditsFrame),
-            text="Simulator",
+            text="The Simulator",
             **HIDDEN_BUTTON_STYLE
         )
         title.pack(pady=200)
@@ -276,59 +276,43 @@ class SimulatorFrame(tk.Frame):
             **BUTTON_STYLE
         )
         back_btn.place(x=10, y=10)
+        
+        # initialize flag for history
+        self.show_history = True
+        
+        # place toggle button at top‑right (adjust x offset as needed)
+        self.toggle_btn = tk.Button(
+            self,
+            text="Hide History",
+            command=self.toggle_history,
+            **BUTTON_STYLE
+        )
+        # anchor NE: button’s top‑right corner sits at (x=780, y=10)
+        self.toggle_btn.place(x=980, y=10, anchor="ne")
 
-        # Controls frame on top
+        # Control Panel
         ctrl = tk.Frame(self, bg="white")
         ctrl.pack(pady=20)
-
-        # Frame / Pages label and input
-        tk.Label(
-            ctrl, text="Number of Frames (1-9):",
-            fg="black", bg="white",
-            font=("Arial", 11)
-        ).grid(row=0, column=0, padx=5)
+        
+        # Number of frames input
+        tk.Label(ctrl, text="Frames (1-9):", font=("Arial", 11), bg="white").grid(row=0, column=0)
         self.frames_entry = tk.Entry(ctrl, width=5, font=("Arial", 11))
         self.frames_entry.insert(0, "3")
-        self.frames_entry.grid(row=0, column=1, padx=5)
+        self.frames_entry.grid(row=0, column=1)
 
-        # Ref length label and input
-        tk.Label(
-            ctrl, text="Reference Length (1-30):",
-            fg="black", bg="white",
-            font=("Arial", 11)
-        ).grid(row=0, column=2, padx=5)
+        # Reference string length input
+        tk.Label(ctrl, text="Length (1-30):", font=("Arial", 11), bg="white").grid(row=0, column=2)
         self.length_entry = tk.Entry(ctrl, width=5, font=("Arial", 11))
         self.length_entry.insert(0, "10")
-        self.length_entry.grid(row=0, column=3, padx=5)
+        self.length_entry.grid(row=0, column=3)
 
-        # Clear Button to stop the project mid process for the users disgression
-        tk.Button(
-            ctrl,
-            text="CLEAR",
-            command=self.clear,
-            **BUTTON_STYLE
-        ).grid(row=1, column=0, pady=10, padx=5)
-        # Algorithm Buttons
-        tk.Button(
-            ctrl,
-            text="Start FIFO",
-            command=self.start_fifo,
-            **BUTTON_STYLE
-        ).grid(row=1, column=1, pady=10, padx=5)
-        tk.Button(
-            ctrl,
-            text="Start LRU",
-            command=self.start_lru,
-            **BUTTON_STYLE
-        ).grid(row=1, column=2, pady=10, padx=5)
-        tk.Button(
-            ctrl,
-            text="Start OPT",
-            command=self.start_opt,
-            **BUTTON_STYLE
-        ).grid(row=1, column=3, pady=10, padx=5)
+        # CLEAR / Algo buttons
+        tk.Button(ctrl, text="CLEAR", command=self.clear, **BUTTON_STYLE).grid(row=1, column=0, pady=5, padx=5)
+        tk.Button(ctrl, text="Start FIFO", command=self.start_fifo, **BUTTON_STYLE).grid(row=1, column=1, padx=5)
+        tk.Button(ctrl, text="Start LRU", command=self.start_lru, **BUTTON_STYLE).grid(row=1, column=2, padx=5)
+        tk.Button(ctrl, text="Start OPT", command=self.start_opt, **BUTTON_STYLE).grid(row=1, column=3, padx=5)
 
-        # Canvas area
+        # Scrollable canvas setup
         container = ttk.Frame(self)
         container.pack(fill="both", expand=True, pady=10)
         self.canvas = tk.Canvas(container, bg="white", height=300)
@@ -337,18 +321,14 @@ class SimulatorFrame(tk.Frame):
         vsb.pack(side="right", fill="y")
         self.canvas.pack(side="left", fill="both", expand=True)
 
-        # Status label
-        self.status = tk.Label(
-            self,
-            text="Status: Ready",
-            fg="black", bg="white"
-        )
+        # Status Bar 
+        self.status = tk.Label(self, text="Status: Ready", **BUTTON_STYLE)
         self.status.pack(pady=5)
 
-        # Simulation state
+        # Initialize all simulation state
         self.reset_state()
 
-    # Simulation reset state 
+    # Clears all data structures and canvas tags for a fresh run
     def reset_state(self):
         self.max_frames = 3
         self.frames = []
@@ -358,30 +338,13 @@ class SimulatorFrame(tk.Frame):
         self.current = 0
         self.algorithm = None
         self.frame_history = []
-        self.canvas.delete("all")
-
-    # Simulation set up frames 
-    def setup_frames(self):
+        
+        # Clear only frames tags and ref tags
         self.canvas.delete("frames")
         self.canvas.delete("ref")
         self.canvas.delete("warning")
-        self.frame_boxes.clear()
-        for i in range(self.max_frames):
-            x = START_X + i * (FRAME_WIDTH + FRAME_SPACING)
-            y = START_Y
-            rect = self.canvas.create_rectangle(
-                x, y, x+FRAME_WIDTH, y+FRAME_HEIGHT,
-                fill="lightgrey",
-                tags=("frame_box","frames")
-            )
-            txt = self.canvas.create_text(
-                x+FRAME_WIDTH/2, y+FRAME_HEIGHT/2,
-                text="", font=("Arial", 16),
-                tags=("frame_box","frames")
-            )
-            self.frame_boxes.append((rect, txt))
-    
-    # Check if user inputs are within allowed ranges 
+
+    # Returns False if entries are non‑numeric or out of range
     def validate_inputs(self):
         try:
             f = int(self.frames_entry.get())
@@ -390,37 +353,41 @@ class SimulatorFrame(tk.Frame):
             return False
         return 1 <= f <= MAX_FRAMES_ALLOWED and 1 <= l <= MAX_REF_LENGTH
 
-    # Display warning on canvas and update status if validate_inputs return false
+    # Display an error when inputs are invalid
     def show_warning(self):
         self.canvas.delete("all")
         warning = f"Inputs out of range!\nFrames: 1-{MAX_FRAMES_ALLOWED}, Length: 1-{MAX_REF_LENGTH}"
-        self.canvas.create_text(390, 175, text=warning, font=("Arial", 16), fill="red")
+        self.canvas.create_text(390, 175, text=warning, font=("Arial", 16), fill="red", tags="warning")
         self.status.config(text="Status: Invalid input, simulation aborted.")
 
-    # Function to call the start of FIFO, assigns the agroithm for FIFO also
+    # Algorithm Starters 
     def start_fifo(self):
         self.algorithm = "FIFO"
         self.status.config(text="FIFO starting")
         self.start_sim()
-    
-    # Function to call the start of LRU, assigns the agroithm for LRU also
+
     def start_lru(self):
         self.algorithm = "LRU"
         self.status.config(text="LRU starting")
         self.start_sim()
-        
-    # Function to call the start of OPT, assigns the agroithm for OPT also
+
     def start_opt(self):
         self.algorithm = "OPT"
         self.status.config(text="OPT starting")
         self.start_sim()
-        
-    # Function to clear canvas and stop simulation
+
+    # User‑requested interruption
     def clear(self):
         self.reset_state()
         self.status.config(text="Simulation Interrupted")
 
-    # Initialize simulation and display reference string if inputs valid
+    # Show or hide the full history vs. just the latest snapshot
+    def toggle_history(self):
+        self.show_history = not self.show_history
+        self.toggle_btn.config(text="Hide History" if self.show_history else "Show History")
+        self.draw_frame_history()
+
+    # Validate inputs, reset state, generate reference string, and kick off stepping
     def start_sim(self):
         if not self.validate_inputs():
             self.show_warning()
@@ -430,10 +397,14 @@ class SimulatorFrame(tk.Frame):
         length = int(self.length_entry.get())
         self.reference_string = [random.randint(0, 9) for _ in range(length)]
         self.frames = [None] * self.max_frames
-        self.status.config(text=f"Ref String: {self.reference_string}")
-        self.after(500, self.next_step)
 
-    # Function of the algorithms that will repeat until finish 
+        # Display algorithm name and reference string
+        self.canvas.create_text(400, 5, text=self.algorithm, font=("Arial", 20), tags="ref")
+
+        self.status.config(text=f"{self.algorithm} Ref String: {self.reference_string}")
+        self.after(500, self.next_step)
+ 
+    # Execute one page reference: hit or fault, record state, then schedule next
     def next_step(self):
         if self.current >= len(self.reference_string):
             self.status.config(text="Simulation complete")
@@ -448,6 +419,7 @@ class SimulatorFrame(tk.Frame):
             self.current += 1
         else:
             if None in self.frames:
+                # fill first empty slot
                 idx = self.frames.index(None)
                 self.frames[idx] = page
                 if self.algorithm == "FIFO":
@@ -456,6 +428,7 @@ class SimulatorFrame(tk.Frame):
                     self.lru_order.append(idx)
                 self.current += 1
             else:
+                 # all frames full → choose index by policy
                 if self.algorithm == "FIFO":
                     idx = self.fifo_queue.pop(0)
                     self.frames[idx] = page
@@ -464,7 +437,7 @@ class SimulatorFrame(tk.Frame):
                     idx = self.lru_order.pop(0)
                     self.frames[idx] = page
                     self.lru_order.append(idx)
-                else:  # OPT
+                else: 
                     future = []
                     for f in self.frames:
                         try:
@@ -476,28 +449,41 @@ class SimulatorFrame(tk.Frame):
                     self.frames[idx] = page
                 self.current += 1
 
-        # Record snapshot and redraw
+        # Record & Redraw 
         self.frame_history.append(self.frames.copy())
         self.draw_frame_history()
         self.after(300, self.next_step)
-        
+
     def draw_frame_history(self):
-        self.canvas.delete("all")
-        for t, snapshot in enumerate(self.frame_history):
-            y_offset = START_Y + t * (FRAME_HEIGHT + FRAME_SPACING)
+        # Clear only frames layer
+        self.canvas.delete("frames")
+        
+        # choose what to draw
+        if self.show_history:
+            data = self.frame_history
+        else:
+            data = self.frame_history[-1:] if self.frame_history else []
+
+        # draw each timestep vertically
+        for t, snapshot in enumerate(data):
+            y0 = START_Y + t * (FRAME_HEIGHT + FRAME_SPACING)
             for i, val in enumerate(snapshot):
-                x = START_X + i * (FRAME_WIDTH + FRAME_SPACING)
+                x0 = START_X + i * (FRAME_WIDTH + FRAME_SPACING)
                 self.canvas.create_rectangle(
-                    x, y_offset, x + FRAME_WIDTH, y_offset + FRAME_HEIGHT,
-                    fill="lightgrey"
+                    x0, y0, x0 + FRAME_WIDTH, y0 + FRAME_HEIGHT,
+                    fill="lightgrey",
+                    tags="frames"
                 )
                 self.canvas.create_text(
-                    x + FRAME_WIDTH / 2, y_offset + FRAME_HEIGHT / 2,
+                    x0 + FRAME_WIDTH/2, y0 + FRAME_HEIGHT/2,
                     text=str(val) if val is not None else "",
-                    font=("Arial", 16)
+                    font=("Arial", 16),
+                    tags="frames"
                 )
-        total_height = START_Y + len(self.frame_history) * (FRAME_HEIGHT + FRAME_SPACING)
-        self.canvas.config(scrollregion=(0, 0, 800, total_height))
+
+        # update scrollable region height
+        total_h = START_Y + len(data) * (FRAME_HEIGHT + FRAME_SPACING)
+        self.canvas.config(scrollregion=(0, 0, 800, total_h))
 
 # app start
 if __name__ == "__main__":
