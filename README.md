@@ -2,13 +2,16 @@
 
 <p align="center">
    <img alt="Python" src="https://img.shields.io/badge/-Python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54"/>
+   <img alt="Python" src="https://img.shields.io/badge/-tkinter-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54"/>
+   <img alt="Python" src="https://img.shields.io/badge/-random-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54"/>
+   <img alt="Python" src="https://img.shields.io/badge/-webbrowser-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54"/>
 </p>
 
 **Overview**
 
 This repository delivers a Tkinter-based page replacement algorithm simulator designed to visualize **FIFO**, **LRU**, and **OPT** strategies. This is a case study for the subject Operating Systems.
 
-[⬇️ Get the latest Windows EXE](https://github.com/Ensues/OS-Case-Study/releases/download/v1.0.0/main.exe)
+[⬇️ Get the latest Windows EXE](https://github.com/Ensues/OS-Case-Study/releases/download/v1.0.1/main.exe)
 
 ---
 
@@ -110,4 +113,4 @@ Distributed under the MIT License. See `LICENSE` for full terms.
 
 ---
 
-**OS Case Study Simulator** • Ensues Development Team
+**OS Case Study Simulator** • Ensues
